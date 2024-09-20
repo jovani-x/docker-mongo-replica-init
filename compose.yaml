@@ -1,0 +1,37 @@
+services:
+  mongo_app_service:
+    container_name: mongo_app_container
+    hostname: mongo_app_host1
+    networks:
+      - mongo-cluster
+    ports:
+      - "27017:27017"
+    restart: always
+    build:
+      context: .
+      dockerfile: /docker/mongo1/Dockerfile
+      args:
+        MONGO_KEY_PATH: ${DB_KEY_PATH}
+        MONGO_KEY_NAME: ${DB_KEY_NAME}
+        MONGO_REPLICA_SET_NAME: ${DB_REPLICA}
+    env_file: .env
+    environment:
+      MONGO_INITDB_DATABASE: ${DB_ADMIN_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ADMIN_PASS}
+      MONGO_REPLICA_SET_NAME: ${DB_REPLICA}
+      MONGO_DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    volumes:
+      - ../data/mongo1_data:/data/db
+    healthcheck:
+      test: 'mongosh --authenticationDatabase $DB_ADMIN_NAME -u $DB_ADMIN_USER -p $DB_ADMIN_PASS --eval "try { rs.status().ok } catch (e) { rs.initiate({ ''_id'': ''$DB_REPLICA'', ''members'': [{ ''_id'': 0, ''host'': ''localhost:27017'' }] }).ok }"'
+      interval: 10s
+      timeout: 30s
+      start_period: 1m
+      retries: 10
+
+networks:
+  mongo-cluster:
+    driver: bridge

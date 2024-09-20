@@ -1,0 +1,10 @@
+replication:
+  replSetName: $MONGO_REPLICA_SET_NAME    # Name of the replica set
+
+security:
+  authorization: "enabled"  # Enabling authorization
+  keyFile: ${MONGO_KEY_PATH}/${MONGO_KEY_NAME}  # Keyfile for internal authentication
+
+net:
+  bindIpAll: true
+  port: 27017
